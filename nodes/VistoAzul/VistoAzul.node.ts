@@ -72,6 +72,7 @@ export class VistoAzul implements INodeType {
 					{ name: 'Reagir', value: 'react', action: 'Reagir a mensagem', description: 'Reage a uma mensagem com emoji' },
 					{ name: 'Editar', value: 'editMessage', action: 'Editar mensagem', description: 'Edita uma mensagem enviada' },
 					{ name: 'Apagar', value: 'deleteMessage', action: 'Apagar mensagem', description: 'Apaga uma mensagem para todos' },
+						{ name: 'Enviar Convite', value: 'sendEvent', action: 'Enviar convite de calendario', description: 'Envia um convite .ics + link do Google Agenda' },
 				],
 				default: 'sendText',
 			},
@@ -158,7 +159,50 @@ export class VistoAzul implements INodeType {
 				required: true,
 				placeholder: '5511999999999',
 				description: 'Numero de destino com DDI e DDD, so digitos',
-				displayOptions: { show: { resource: ['message'], operation: ['sendText', 'sendMedia', 'sendPix', 'sendPoll', 'presence', 'react'] } },
+				displayOptions: { show: { resource: ['message'], operation: ['sendText', 'sendMedia', 'sendPix', 'sendPoll', 'presence', 'react', 'sendEvent'] } },
+			},
+
+			// --- sendEvent (convite de calendario) ---
+			{
+				displayName: 'Titulo do Evento',
+				name: 'eventTitle',
+				type: 'string',
+				default: '',
+				required: true,
+				placeholder: 'Demo Visto Azul',
+				displayOptions: { show: { resource: ['message'], operation: ['sendEvent'] } },
+			},
+			{
+				displayName: 'Inicio (ISO)',
+				name: 'eventStart',
+				type: 'string',
+				default: '',
+				required: true,
+				placeholder: '2026-08-14T15:00',
+				description: 'Data/hora em ISO. Sem fuso, assume horario de Brasilia (BRT).',
+				displayOptions: { show: { resource: ['message'], operation: ['sendEvent'] } },
+			},
+			{
+				displayName: 'Duracao (min)',
+				name: 'eventDuration',
+				type: 'number',
+				default: 30,
+				displayOptions: { show: { resource: ['message'], operation: ['sendEvent'] } },
+			},
+			{
+				displayName: 'Local / Link',
+				name: 'eventLocation',
+				type: 'string',
+				default: '',
+				placeholder: 'Google Meet: https://...',
+				displayOptions: { show: { resource: ['message'], operation: ['sendEvent'] } },
+			},
+			{
+				displayName: 'Descricao',
+				name: 'eventDescription',
+				type: 'string',
+				default: '',
+				displayOptions: { show: { resource: ['message'], operation: ['sendEvent'] } },
 			},
 
 			// --- Atendimento (acoes na conversa) ---
@@ -229,6 +273,8 @@ export class VistoAzul implements INodeType {
 					{ name: 'Imagem', value: 'image' },
 					{ name: 'Video', value: 'video' },
 					{ name: 'Documento', value: 'document' },
+					{ name: 'Audio (arquivo)', value: 'audio' },
+					{ name: 'Nota de Voz', value: 'ptt' },
 				],
 				default: 'image',
 				displayOptions: { show: { resource: ['message'], operation: ['sendMedia'] } },
@@ -558,7 +604,19 @@ export class VistoAzul implements INodeType {
 						path = '/messages/delete';
 						if (instance) body.instance = instance;
 						body.id = this.getNodeParameter('messageId', i) as string;
-					}
+					} else if (operation === 'sendEvent') {
+							path = '/messages/event';
+							if (instance) body.instance = instance;
+							body.number = number;
+							body.title = this.getNodeParameter('eventTitle', i) as string;
+							body.start = this.getNodeParameter('eventStart', i) as string;
+							const dur = this.getNodeParameter('eventDuration', i, 30) as number;
+							if (dur) body.durationMin = dur;
+							const loc = this.getNodeParameter('eventLocation', i, '') as string;
+							if (loc) body.location = loc;
+							const desc = this.getNodeParameter('eventDescription', i, '') as string;
+							if (desc) body.description = desc;
+						}
 				} else if (resource === 'contact') {
 					if (operation === 'upsert') {
 						path = '/contacts';

@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-vistoazul",
-  "version": "0.2.0",
-  "description": "n8n community node para a API de WhatsApp da Visto Azul: enviar texto, midia, cobranca PIX, campanhas em massa, contatos, grupos e receber mensagens por webhook.",
+  "version": "0.3.0",
+  "description": "n8n community node para a API de WhatsApp da Visto Azul: texto, midia (imagem/video/documento/audio/nota de voz), PIX, enquete, convite de calendario (.ics + Google Agenda), campanhas, contatos, grupos, checar numeros e webhook.",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
